@@ -70,28 +70,28 @@ menuItemsRouter.put('/:menuItemId', (req, res, next) => {
         price = req.body.menuItem.price;
   if (!name || !description || !inventory || !price) {
     res.sendStatus(400);
-  }
+  } else {
+    const sql = `UPDATE "MenuItem"
+                 SET "name" = $name, description = $description, 
+                     inventory = $inventory, price = $price
+                 WHERE "id" = $id;`,
+          values = {
+            $id: id,
+            $name: name,
+            $description: description,
+            $inventory: inventory,
+            $price: price,
+          };
 
-  const sql = `UPDATE "MenuItem"
-               SET "name" = $name, description = $description, 
-                   inventory = $inventory, price = $price
-               WHERE "id" = $id;`,
-        values = {
-          $id: id,
-          $name: name,
-          $description: description,
-          $inventory: inventory,
-          $price: price,
-        };
-
-  db.run(sql, values, (err) => {
-    if (err) {
-      return next(err);
-    }
-    db.get(`SELECT * FROM "MenuItem" WHERE id = $id;`, {$id: id}, (err, menuItem) => {
-      res.status(200).json({menuItem: menuItem});
+    db.run(sql, values, (err) => {
+      if (err) {
+        return next(err);
+      }
+      db.get(`SELECT * FROM "MenuItem" WHERE id = $id;`, {$id: id}, (err, menuItem) => {
+        res.status(200).json({menuItem: menuItem});
+      });
     });
-  });
+  }
 });
 
 menuItemsRouter.delete('/:menuItemId', (req, res, next) => {
